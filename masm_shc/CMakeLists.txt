@@ -6,9 +6,11 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
 
 set (srcs
 	main.cpp
+	string_util.cpp
 )
 
 set (hdrs
+	string_util.h
 )
 
 add_executable ( ${PROJECT_NAME} ${hdrs} ${srcs} )

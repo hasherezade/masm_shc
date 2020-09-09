@@ -9,6 +9,8 @@
 #include <vector>
 #include <map>
 
+#include "string_util.h"
+
 bool g_is32bit = false;
 
 typedef struct {
@@ -20,27 +22,6 @@ typedef struct {
     bool appendRSPStub;
 } t_params;
 
-bool is_empty(std::string &str)
-{
-    for (size_t i = 0; i < str.length(); i++) {
-        const char c = str[i];
-        if (!isspace(c)) {
-            return false;
-        }
-    }
-    return true;
-}
-
-std::string replace_char(std::string str, const char to_replace[], const size_t to_replace_count)
-{
-    for (size_t i = 0; i < str.length(); i++) {
-        const char c = str[i];
-        for (size_t k = 0; k < to_replace_count; k++) {
-            if (c == to_replace[k]) str[i] = ' ';
-        }
-    }
-    return str;
-}
 
 bool has_token(std::vector<std::string> &tokens, const std::string &token)
 {
@@ -65,40 +46,21 @@ std::string get_constant(std::map<std::string, std::string> &consts_lines, std::
     return "";
 }
 
-void remove_prefix(std::string &str, const std::string &prefix)
-{
-    std::string::size_type i = str.find(prefix);
-
-    if (i != std::string::npos)
-        str.erase(i, prefix.length());
-}
-
-void replace_str(std::string &my_str, const std::string from_str, const std::string to_str)
-{
-    int index;
-
-    while ((index = my_str.find(from_str)) != std::string::npos) {
-        my_str.replace(index, from_str.length(), to_str);
-    }
-}
-
 std::vector<std::string> split_to_tokens(std::string orig_line)
 {
     const char to_replace[] = { '\t', ',' };
+    std::string line = orig_line;
+    for (size_t i = 0; i < _countof(to_replace); i++) {
+        replace_char(line, to_replace[i], ' ');
+    }
 
-    std::string line = replace_char(orig_line, to_replace, _countof(to_replace));
+    std::vector<std::string> tokens = split_by_delimiter(line, ' ');
 
-    std::string split;
-    std::istringstream ss(line);
-    std::vector<std::string> tokens;
-
-    while (std::getline(ss, split, ' ')) {
-
-        remove_prefix(split, "FLAT:");
-
-        if (!is_empty(split)) {
-            tokens.push_back(split);
-        }
+    //post-process tokens
+    std::vector<std::string>::iterator itr;
+    for (itr = tokens.begin(); itr != tokens.end(); itr++) {
+        std::string &token = *itr;
+        remove_prefix(token, "FLAT:");
     }
     return tokens;
 }
@@ -177,7 +139,7 @@ void process_file(t_params &params)
                     }
                     else if (params.appendRSPStub) {
                         append_align_rsp(ofile);
-                        std::cerr << "[INFO] Entry Point: AlignRSP\n";
+                        std::cout << "[INFO] Entry Point: AlignRSP\n";
                     }
 
                 }
@@ -195,7 +157,7 @@ void process_file(t_params &params)
             if (tokens[1] == "ENDS" && tokens[0] == seg_name) {
                 seg_name = "";
 
-                if (in_const) continue; // skip the ending of the section
+                if (in_const) continue; // skip the ending of the CONST section
             }
         }
         if (in_skipped) {
@@ -248,7 +210,7 @@ void process_file(t_params &params)
     ofile.close();
 
     if (params.inlineStrings) {
-        std::cerr << "[INFO] Strings have been inlined. It may require to change some short jumps (jmp SHORT) into jumps (jmp)\n";
+        std::cout << "[INFO] Strings have been inlined. It may require to change some short jumps (jmp SHORT) into jumps (jmp)\n";
     }
 }
 
