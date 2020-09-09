@@ -25,7 +25,7 @@ It should automatically resolve most of the issues. The remaining issues should 
 3. Compile the resulting file by MASM into a PE (use `ml` for 32-bit files and `ml64` for 64 bit files analogicaly)
 
 ```
-ml <cleaned_file>.asm /lint /entry:<my_entry_func>
+ml <cleaned_file>.asm /link /entry:<my_entry_func>
 ```
 
 4. Use PE-bear to dump the .text section from the resulting PE. This will be our shellcode.
