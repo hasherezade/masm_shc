@@ -22,7 +22,7 @@ masm_shc.exe <file>.asm <cleaned_file>.asm
 
 It should automatically resolve most of the issues. The remaining issues should be resolved manually following the diplayed hints. It will also inform if the Entry Point was changed
 
-3. Compile the resulting file by MASM into a PE.
+3. Compile the resulting file by MASM into a PE (use `ml` for 32-bit files and `ml64` for 64 bit files analogicaly)
 
 ```
 ml <cleaned_file>.asm /lint /entry:<my_entry_func>
