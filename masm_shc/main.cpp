@@ -97,11 +97,13 @@ bool process_file(t_params &params)
 {
     std::ifstream file(params.infile);
     if (!file.is_open()) {
+        std::cerr << "[ERROR] Opening the input file failed!\n";
         return false;
     }
 
     std::ofstream ofile(params.outfile);
     if (!ofile.is_open()) {
+        std::cerr << "[ERROR] Opening the output file failed!\n";
         return false;
     }
     std::map<std::string, std::string> consts_lines;
