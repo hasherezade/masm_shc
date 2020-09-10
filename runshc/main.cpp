@@ -5,13 +5,14 @@
 int main(int argc, char *argv[])
 {
     if (argc < 2) {
-        std::cout << "~ runshc ~\n"
+        std::cout << "~ runshc ~\n\n"
             << "Run shellcode: loads and deploys shellcode file.\n";
 #ifdef _WIN64
         std::cout << "For 64-bit shellcodes.\n";
 #else
         std::cout << "For 32-bit shellcodes.\n";
 #endif
+        std::cout << "\n";
         std::cout << "Args: <shellcode_file>" << std::endl;
         system("pause");
         return 0;
