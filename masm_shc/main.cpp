@@ -10,7 +10,7 @@
 #include <map>
 
 #include "string_util.h"
-#define VERSION "0.1"
+#define VERSION "0.2"
 
 bool g_is32bit = false;
 
