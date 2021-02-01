@@ -196,8 +196,12 @@ bool process_file(t_params &params)
             ofile << consts_lines[curr_const] << "\n";
             ofile << label_after << ":\n";
             if (tokens.size() > 2 && (tokens[0] == "lea" || tokens[0] == "mov")) {
-                std::string reg = tokens[1];
-                ofile << "\tPOP  " << reg << "\n";
+                auto offset_index = find(tokens.begin() + 1, tokens.end(), "OFFSET");
+                std::string instructions = tokens[1];
+                if(std::distance(tokens.begin(), offset_index) == 4) {
+                    instructions = tokens[1] + " " + tokens[2]+ " " + tokens[3];
+                }
+                ofile << "\tPOP  " << instructions << "\n";
             }
             ofile << "\n";
             ofile << "; " << line << "\n"; //copy commented out line
