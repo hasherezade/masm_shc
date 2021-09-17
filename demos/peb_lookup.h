@@ -80,7 +80,7 @@ inline LPVOID get_module_by_name(WCHAR* module_name)
     PLDR_DATA_TABLE_ENTRY curr_module = Flink;
 
     while (curr_module != NULL && curr_module->BaseAddress != NULL) {
-        if (curr_module->BaseDllName.Buffer {
+        if (curr_module->BaseDllName.Buffer) {
             WCHAR* curr_name = curr_module->BaseDllName.Buffer;
 
             size_t i = 0;
