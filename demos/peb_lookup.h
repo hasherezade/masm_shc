@@ -1,104 +1,44 @@
 #pragma once
-#include <Windows.h>
 
-#ifndef __NTDLL_H__
+#include <windows.h>
+#include <winternl.h>
 
 #ifndef TO_LOWERCASE
 #define TO_LOWERCASE(out, c1) (out = (c1 <= 'Z' && c1 >= 'A') ? c1 = (c1 - 'A') + 'a': c1)
 #endif
 
-
-typedef struct _UNICODE_STRING
-{
-    USHORT Length;
-    USHORT MaximumLength;
-    PWSTR  Buffer;
-
-} UNICODE_STRING, * PUNICODE_STRING;
-
-typedef struct _PEB_LDR_DATA
-{
-    ULONG Length;
-    BOOLEAN Initialized;
-    HANDLE SsHandle;
-    LIST_ENTRY InLoadOrderModuleList;      
-    LIST_ENTRY InMemoryOrderModuleList;        
-    LIST_ENTRY InInitializationOrderModuleList;
-    PVOID      EntryInProgress;
-
-} PEB_LDR_DATA, * PPEB_LDR_DATA;
-
-//here we don't want to use any functions imported form extenal modules
-
-typedef struct _LDR_DATA_TABLE_ENTRY {
-    LIST_ENTRY  InLoadOrderModuleList;
-    LIST_ENTRY  InMemoryOrderModuleList;
-    LIST_ENTRY  InInitializationOrderModuleList;
-    void* BaseAddress; 
-    void* EntryPoint; 
-    ULONG   SizeOfImage;
-    UNICODE_STRING FullDllName;
-    UNICODE_STRING BaseDllName;
-    ULONG   Flags;
-    SHORT   LoadCount;
-    SHORT   TlsIndex;
-    HANDLE  SectionHandle;
-    ULONG   CheckSum;
-    ULONG   TimeDateStamp;
-} LDR_DATA_TABLE_ENTRY, * PLDR_DATA_TABLE_ENTRY;
-
-
-typedef struct _PEB
-{
-    BOOLEAN InheritedAddressSpace;      
-    BOOLEAN ReadImageFileExecOptions;  
-    BOOLEAN BeingDebugged;             
-    BOOLEAN SpareBool;                 
-    HANDLE Mutant;                     
-
-    PVOID ImageBaseAddress;
-    PPEB_LDR_DATA Ldr;
-
-    // [...] this is a fragment, more elements follow here
-
-} PEB, * PPEB;
-
-#endif //__NTDLL_H__
-
 inline LPVOID get_module_by_name(WCHAR* module_name)
 {
-    PPEB peb = NULL;
+    //FIXME
+    //PEB *peb = NtCurrentTeb()->ProcessEnvironmentBlock;
+    PEB *peb;
 #if defined(_WIN64)
     peb = (PPEB)__readgsqword(0x60);
 #else
     peb = (PPEB)__readfsdword(0x30);
 #endif
-    PPEB_LDR_DATA ldr = peb->Ldr;
-    LIST_ENTRY list = ldr->InLoadOrderModuleList;
+    PEB_LDR_DATA *ldr = peb->Ldr;
 
-    PLDR_DATA_TABLE_ENTRY Flink = *((PLDR_DATA_TABLE_ENTRY*)(&list));
-    PLDR_DATA_TABLE_ENTRY curr_module = Flink;
+    LIST_ENTRY *head = &ldr->InMemoryOrderModuleList;
+    for(LIST_ENTRY *current = head->Flink; current != head; current = current->Flink){
+        LDR_DATA_TABLE_ENTRY *entry = CONTAINING_RECORD(current, LDR_DATA_TABLE_ENTRY, InMemoryOrderLinks);
 
-    while (curr_module != NULL && curr_module->BaseAddress != NULL) {
-        if (curr_module->BaseDllName.Buffer) {
-            WCHAR* curr_name = curr_module->BaseDllName.Buffer;
+        UNICODE_STRING *dllName = (&entry->FullDllName) + 1; //hack to access BaseDllName field
+        WCHAR *curr_name = dllName->Buffer;
 
-            size_t i = 0;
-            for (i = 0; module_name[i] != 0 && curr_name[i] != 0; i++) {
-                WCHAR c1, c2;
-                TO_LOWERCASE(c1, module_name[i]);
-                TO_LOWERCASE(c2, curr_name[i]);
-                if (c1 != c2) break;
-            }
-            if (module_name[i] == 0 && curr_name[i] == 0) {
-                //found
-                return curr_module->BaseAddress;
-            }
+        size_t i;
+        for (i = 0; module_name[i] != 0 && curr_name[i] != 0; i++) {
+            WCHAR c1, c2;
+            TO_LOWERCASE(c1, module_name[i]);
+            TO_LOWERCASE(c2, curr_name[i]);
+            if (c1 != c2) break;
         }
-        // not found, try next:
-        curr_module = (PLDR_DATA_TABLE_ENTRY)curr_module->InLoadOrderModuleList.Flink;
+        if (module_name[i] == 0 && curr_name[i] == 0) {
+            return entry->DllBase;
+        }
     }
-    return NULL;
+
+    return nullptr;
 }
 
 inline LPVOID get_func_by_name(LPVOID module, char* func_name)
@@ -128,7 +68,7 @@ inline LPVOID get_func_by_name(LPVOID module, char* func_name)
         DWORD* funcRVA = (DWORD*)(funcsListRVA + (BYTE*)module + (*nameIndex) * sizeof(DWORD));
 
         LPSTR curr_name = (LPSTR)(*nameRVA + (BYTE*)module);
-        size_t k = 0;
+        size_t k;
         for (k = 0; func_name[k] != 0 && curr_name[k] != 0; k++) {
             if (func_name[k] != curr_name[k]) break;
         }
