@@ -9,7 +9,7 @@ def main():
     parser.add_argument('--buf', dest="buf", default="0", help="Buffer to send")
     args = parser.parse_args()
     my_port = int(args.port, 10)
-    print('[+] Connecting to port: ' + hex(my_port))
+    print('[+] Connecting to port: ' + str(my_port))
     key = args.buf
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
