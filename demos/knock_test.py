@@ -2,6 +2,7 @@ import socket
 import sys
 import argparse
 
+
 def main():
     parser = argparse.ArgumentParser(description="Send to the Crackme")
     parser.add_argument('--port', dest="port", default="1337", help="Port to connect")
@@ -20,6 +21,7 @@ def main():
         s.close()
     except socket.error:
         print("Could not connect to the socket. Is the crackme running?")
+
 
 if __name__ == "__main__":
     sys.exit(main())
