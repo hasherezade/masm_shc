@@ -8,7 +8,7 @@ def main():
     parser.add_argument('--buf', dest="buf", default="0", help="Buffer to send")
     args = parser.parse_args()
     my_port = int(args.port, 10)
-    print '[+] Connecting to port: ' + hex(my_port)
+    print('[+] Connecting to port: ' + hex(my_port))
     key = args.buf
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -16,11 +16,10 @@ def main():
         s.send(key)
         result = s.recv(512)
         if result is not None:
-            print "[+] Response: " + result
+            print("[+] Response: " + str(result))
         s.close()
     except socket.error:
-        print "Could not connect to the socket. Is the crackme running?"
-    
+        print("Could not connect to the socket. Is the crackme running?")
+
 if __name__ == "__main__":
     sys.exit(main())
-	
