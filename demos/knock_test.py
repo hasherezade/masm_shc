@@ -6,11 +6,11 @@ import argparse
 def main():
     parser = argparse.ArgumentParser(description="Send to the Crackme")
     parser.add_argument('--port', dest="port", default="1337", help="Port to connect")
-    parser.add_argument('--buf', dest="buf", default=b"9", help="Buffer to send")
+    parser.add_argument('--buf', dest="buf", default="9", help="Buffer to send")
     args = parser.parse_args()
     my_port = int(args.port)
     print('[+] Connecting to port: ' + str(my_port))
-    key = args.buf
+    key = args.buf.encode()
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect(('127.0.0.1', my_port))
