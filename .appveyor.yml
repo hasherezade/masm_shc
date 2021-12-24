@@ -41,4 +41,3 @@ after_build:
 
 artifacts:
   - path: build\%artifactName%
-  
