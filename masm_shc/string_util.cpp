@@ -1,6 +1,6 @@
 #include "string_util.h"
 
-std::vector<std::string> split_by_delimiter(std::string line, char delim)
+std::vector<std::string> split_by_delimiter(const std::string& line, char delim)
 {
     std::string split;
     std::istringstream ss(line);
@@ -18,10 +18,10 @@ std::vector<std::string> split_by_delimiter(std::string line, char delim)
 size_t replace_char(std::string &str, const char from, const char to)
 {
     size_t replaced = 0;
-    for (size_t i = 0; i < str.length(); i++) {
-        const char c = str[i];
+    for (char &i: str) {
+        const char c = i;
         if (c == from) {
-            str[i] = to;
+            i = to;
             replaced++;
         }
     }
@@ -36,9 +36,9 @@ void remove_prefix(std::string &str, const std::string &prefix)
         str.erase(i, prefix.length());
 }
 
-void replace_str(std::string &my_str, const std::string from_str, const std::string to_str)
+void replace_str(std::string &my_str, const std::string& from_str, const std::string& to_str)
 {
-    int index;
+    size_t index;
     while ((index = my_str.find(from_str)) != std::string::npos) {
         my_str.replace(index, from_str.length(), to_str);
     }

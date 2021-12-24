@@ -3,7 +3,7 @@
 
 BYTE* util::alloc_aligned(size_t buffer_size, DWORD protect, ULONGLONG desired_base)
 {
-    if (!buffer_size) return NULL;
+    if (!buffer_size) return nullptr;
 
     BYTE* buf = (BYTE*)VirtualAlloc((LPVOID)desired_base, buffer_size, MEM_COMMIT | MEM_RESERVE, protect);
     return buf;
@@ -23,14 +23,14 @@ bool util::free_aligned(BYTE* buffer)
 
 BYTE* util::load_file(IN const char *filename, OUT size_t &read_size)
 {
-    HANDLE file = CreateFileA(filename, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+    HANDLE file = CreateFileA(filename, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (file == INVALID_HANDLE_VALUE) {
 #ifdef _DEBUG
         std::cerr << "Could not open file!" << std::endl;
 #endif
         return nullptr;
     }
-    HANDLE mapping = CreateFileMapping(file, 0, PAGE_READONLY, 0, 0, 0);
+    HANDLE mapping = CreateFileMappingA(file, nullptr, PAGE_READONLY, 0, 0, nullptr);
     if (!mapping) {
 #ifdef _DEBUG
         std::cerr << "Could not create mapping!" << std::endl;
@@ -47,7 +47,7 @@ BYTE* util::load_file(IN const char *filename, OUT size_t &read_size)
         CloseHandle(file);
         return nullptr;
     }
-    size_t r_size = GetFileSize(file, 0);
+    size_t r_size = GetFileSize(file, nullptr);
     if (read_size != 0 && read_size <= r_size) {
         r_size = read_size;
     }
