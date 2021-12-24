@@ -5,55 +5,23 @@
 
 typedef struct
 {
-    HMODULE(WINAPI * _LoadLibraryA)(LPCSTR lpLibFileName);
-    FARPROC(WINAPI * _GetProcAddress)(HMODULE hModule, LPCSTR lpProcName);
+    decltype(&LoadLibraryA) _LoadLibraryA;
+    decltype(&GetProcAddress) _GetProcAddress;
 } t_mini_iat;
 
 typedef struct
 {
-    int (PASCAL FAR *_WSAStartup)(
-        _In_ WORD wVersionRequired,
-        _Out_ LPWSADATA lpWSAData);
-
-    SOCKET(PASCAL FAR *_socket)(
-        _In_ int af,
-        _In_ int type,
-        _In_ int protocol);
-
-    unsigned long (PASCAL FAR *_inet_addr)(_In_z_ const char FAR * cp);
-
-    int (PASCAL FAR *_bind)(
-        _In_ SOCKET s,
-        _In_reads_bytes_(namelen) const struct sockaddr FAR *addr,
-        _In_ int namelen);
-
-    int (PASCAL FAR *_listen)(
-        _In_ SOCKET s,
-        _In_ int backlog);
-
-    SOCKET(PASCAL FAR *_accept)(
-        _In_ SOCKET s,
-        _Out_writes_bytes_opt_(*addrlen) struct sockaddr FAR *addr,
-        _Inout_opt_ int FAR *addrlen);
-
-    int (PASCAL FAR *_recv)(
-        _In_ SOCKET s,
-        _Out_writes_bytes_to_(len, return) __out_data_source(NETWORK) char FAR * buf,
-        _In_ int len,
-        _In_ int flags);
-
-    int (PASCAL FAR *_send)(
-        _In_ SOCKET s,
-        _In_reads_bytes_(len) const char FAR * buf,
-        _In_ int len,
-        _In_ int flags);
-
-    int (PASCAL FAR *_closesocket)(IN SOCKET s);
-
-    u_short(PASCAL FAR *_htons)(_In_ u_short hostshort);
-
-    int (PASCAL FAR *_WSACleanup)(void);
-
+    decltype(&WSAStartup) _WSAStartup;
+    decltype(&socket) _socket;
+    decltype(&inet_addr) _inet_addr;
+    decltype(&bind) _bind;
+    decltype(&listen) _listen;
+    decltype(&accept) _accept;
+    decltype(&recv) _recv;
+    decltype(&send) _send;
+    decltype(&closesocket) _closesocket;
+    decltype(&htons) _htons;
+    decltype(&WSACleanup) _WSACleanup;
 } t_socket_iat;
 
 
@@ -73,8 +41,8 @@ bool init_iat(t_mini_iat &iat)
         return false;
     }
 
-    iat._LoadLibraryA = (HMODULE(WINAPI*)(LPCSTR)) load_lib;
-    iat._GetProcAddress = (FARPROC(WINAPI*)(HMODULE, LPCSTR)) get_proc;
+    iat._LoadLibraryA = reinterpret_cast<decltype(&LoadLibraryA)>(load_lib);
+    iat._GetProcAddress = reinterpret_cast<decltype(&GetProcAddress)>(get_proc);
     return true;
 }
 
@@ -82,53 +50,17 @@ bool init_socket_iat(t_mini_iat &iat, t_socket_iat &sIAT)
 {
     LPVOID WS232_dll = iat._LoadLibraryA("WS2_32.dll");
 
-    sIAT._WSAStartup = (int (PASCAL FAR *)(
-        _In_ WORD,
-        _Out_ LPWSADATA)) iat._GetProcAddress((HMODULE)WS232_dll, "WSAStartup");
-
-    sIAT._socket = (SOCKET(PASCAL FAR *)(
-        _In_ int af,
-        _In_ int type,
-        _In_ int protocol)) iat._GetProcAddress((HMODULE)WS232_dll, "socket");
-
-    sIAT._inet_addr
-        = (unsigned long (PASCAL FAR *)(_In_z_ const char FAR * cp))
-        iat._GetProcAddress((HMODULE)WS232_dll, "inet_addr");
-
-    sIAT._bind = (int (PASCAL FAR *)(
-        _In_ SOCKET s,
-        _In_reads_bytes_(namelen) const struct sockaddr FAR *addr,
-        _In_ int namelen)) iat._GetProcAddress((HMODULE)WS232_dll, "bind");
-
-    sIAT._listen = (int (PASCAL FAR *)(
-        _In_ SOCKET s,
-        _In_ int backlog)) iat._GetProcAddress((HMODULE)WS232_dll, "listen");
-
-    sIAT._accept = (SOCKET(PASCAL FAR *)(
-        _In_ SOCKET s,
-        _Out_writes_bytes_opt_(*addrlen) struct sockaddr FAR *addr,
-        _Inout_opt_ int FAR *addrlen)) iat._GetProcAddress((HMODULE)WS232_dll, "accept"); ;
-
-    sIAT._recv = (int (PASCAL FAR *)(
-        _In_ SOCKET s,
-        _Out_writes_bytes_to_(len, return) __out_data_source(NETWORK) char FAR * buf,
-        _In_ int len,
-        _In_ int flags)) iat._GetProcAddress((HMODULE)WS232_dll, "recv"); ;
-
-    sIAT._send = (int (PASCAL FAR *)(
-        _In_ SOCKET s,
-        _In_reads_bytes_(len) const char FAR * buf,
-        _In_ int len,
-        _In_ int flags)) iat._GetProcAddress((HMODULE)WS232_dll, "send");
-
-    sIAT._closesocket
-        = (int (PASCAL FAR *)(IN SOCKET s)) iat._GetProcAddress((HMODULE)WS232_dll, "closesocket");
-
-    sIAT._htons
-        = (u_short(PASCAL FAR *)(_In_ u_short hostshort)) iat._GetProcAddress((HMODULE)WS232_dll, "htons");
-
-    sIAT._WSACleanup
-        = (int (PASCAL FAR *)(void)) iat._GetProcAddress((HMODULE)WS232_dll, "WSACleanup");
+    sIAT._WSAStartup = reinterpret_cast<decltype(&WSAStartup)>(iat._GetProcAddress((HMODULE)WS232_dll, "WSAStartup"));
+    sIAT._socket = reinterpret_cast<decltype(&socket)>(iat._GetProcAddress((HMODULE)WS232_dll, "socket"));
+    sIAT._inet_addr = reinterpret_cast<decltype(&inet_addr)>(iat._GetProcAddress((HMODULE)WS232_dll, "inet_addr"));
+    sIAT._bind = reinterpret_cast<decltype(&bind)>(iat._GetProcAddress((HMODULE)WS232_dll, "bind"));
+    sIAT._listen = reinterpret_cast<decltype(&listen)>(iat._GetProcAddress((HMODULE)WS232_dll, "listen"));
+    sIAT._accept = reinterpret_cast<decltype(&accept)>(iat._GetProcAddress((HMODULE)WS232_dll, "accept"));
+    sIAT._recv = reinterpret_cast<decltype(&recv)>(iat._GetProcAddress((HMODULE)WS232_dll, "recv"));
+    sIAT._send = reinterpret_cast<decltype(&send)>(iat._GetProcAddress((HMODULE)WS232_dll, "send"));
+    sIAT._closesocket = reinterpret_cast<decltype(&closesocket)>(iat._GetProcAddress((HMODULE)WS232_dll, "closesocket"));
+    sIAT._htons = reinterpret_cast<decltype(&htons)>(iat._GetProcAddress((HMODULE)WS232_dll, "htons"));
+    sIAT._WSACleanup = reinterpret_cast<decltype(&WSACleanup)>(iat._GetProcAddress((HMODULE)WS232_dll, "WSACleanup"));
 
     return true;
 }
@@ -180,15 +112,7 @@ bool listen_for_connect(t_mini_iat &iat, int port, char resp[4])
     LPVOID u32_dll = iat._LoadLibraryA("user32.dll");
 
 
-    int (WINAPI * _MessageBoxW)(
-        _In_opt_ HWND hWnd,
-        _In_opt_ LPCWSTR lpText,
-        _In_opt_ LPCWSTR lpCaption,
-        _In_ UINT uType) = (int (WINAPI*)(
-            _In_opt_ HWND,
-            _In_opt_ LPCWSTR,
-            _In_opt_ LPCWSTR,
-            _In_ UINT)) iat._GetProcAddress((HMODULE)u32_dll, "MessageBoxW");
+    auto _MessageBoxW = reinterpret_cast<decltype(&MessageBoxW)>(iat._GetProcAddress((HMODULE)u32_dll, "MessageBoxW"));
 
     bool got_resp = false;
     WSADATA wsaData;
@@ -199,8 +123,8 @@ bool listen_for_connect(t_mini_iat &iat, int port, char resp[4])
     }
     struct sockaddr_in sock_config;
     SecureZeroMemory(&sock_config, sizeof(sock_config));
-    SOCKET listen_socket = 0;
-    if ((listen_socket = sIAT._socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET) {
+    SOCKET listen_socket = sIAT._socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (listen_socket == INVALID_SOCKET) {
         _MessageBoxW(NULL, L"Creating the socket failed", L"Stage 2", MB_ICONEXCLAMATION);
         sIAT._WSACleanup();
         return false;
