@@ -45,12 +45,12 @@ inline LPVOID get_func_by_name(LPVOID module, char* func_name)
 {
     IMAGE_DOS_HEADER* idh = (IMAGE_DOS_HEADER*)module;
     if (idh->e_magic != IMAGE_DOS_SIGNATURE) {
-        return NULL;
+        return nullptr;
     }
     IMAGE_NT_HEADERS* nt_headers = (IMAGE_NT_HEADERS*)((BYTE*)module + idh->e_lfanew);
     IMAGE_DATA_DIRECTORY* exportsDir = &(nt_headers->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT]);
-    if (exportsDir->VirtualAddress == NULL) {
-        return NULL;
+    if (!exportsDir->VirtualAddress) {
+        return nullptr;
     }
 
     DWORD expAddr = exportsDir->VirtualAddress;
@@ -77,5 +77,5 @@ inline LPVOID get_func_by_name(LPVOID module, char* func_name)
             return (BYTE*)module + (*funcRVA);
         }
     }
-    return NULL;
+    return nullptr;
 }
