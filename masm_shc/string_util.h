@@ -19,10 +19,10 @@ inline std::string& trim(std::string& s)
     return s;
 }
 
-std::vector<std::string> split_by_delimiter(std::string line, char delim);
+std::vector<std::string> split_by_delimiter(const std::string& line, char delim);
 
 size_t replace_char(std::string &str, const char from, const char to);
 
 void remove_prefix(std::string &str, const std::string &prefix);
 
-void replace_str(std::string &my_str, const std::string from_str, const std::string to_str);
+void replace_str(std::string &my_str, const std::string& from_str, const std::string& to_str);
