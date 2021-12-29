@@ -1,3 +1,9 @@
+/*
+WARNING: the code section will be modified, and must be set writeable! 
+Example:
+ml64 knock.asm /link /entry:main /section:.text,ERW
+*/
+
 #include <Windows.h>
 #include "peb_lookup.h"
 
