@@ -15,18 +15,19 @@ std::vector<std::string> split_by_delimiter(const std::string& line, char delim)
     return tokens;
 }
 
-size_t replace_char(std::string &str, const char from, const char to)
+size_t replace_char(std::string& str, const char from, const char to)
 {
     size_t replaced = 0;
-    for (char &i: str) {
-        const char c = i;
+    for (size_t i = 0; i < str.length(); i++) {
+        const char c = str[i];
         if (c == from) {
-            i = to;
+            str[i] = to;
             replaced++;
         }
     }
     return replaced;
 }
+
 
 void remove_prefix(std::string &str, const std::string &prefix)
 {

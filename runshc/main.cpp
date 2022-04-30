@@ -2,8 +2,6 @@
 #include <iostream>
 #include "util.h"
 
-int my_main_prototype();
-
 int main(int argc, char *argv[])
 {
     if (argc < 2) {
@@ -43,7 +41,7 @@ int main(int argc, char *argv[])
 
     std::cout << "[*] Running the shellcode:" << std::endl;
     //run it:
-    auto my_main = reinterpret_cast<decltype(&my_main_prototype)>(test_buf); //function pointer to my_main_prototype
+    int(*my_main)() = (int(*)()) ((ULONGLONG)test_buf);
     int ret_val = my_main();
 
     util::free_aligned(test_buf);
