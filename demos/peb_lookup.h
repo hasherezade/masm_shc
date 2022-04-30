@@ -7,10 +7,26 @@
 #define TO_LOWERCASE(out, c1) (out = (c1 <= 'Z' && c1 >= 'A') ? c1 = (c1 - 'A') + 'a': c1)
 #endif
 
+// enhanced version of LDR_DATA_TABLE_ENTRY
+typedef struct _LDR_DATA_TABLE_ENTRY1 {
+    LIST_ENTRY  InLoadOrderLinks;
+    LIST_ENTRY  InMemoryOrderLinks;
+    LIST_ENTRY  InInitializationOrderLinks;
+    void* DllBase;
+    void* EntryPoint;
+    ULONG   SizeOfImage;
+    UNICODE_STRING FullDllName;
+    UNICODE_STRING BaseDllName;
+    ULONG   Flags;
+    SHORT   LoadCount;
+    SHORT   TlsIndex;
+    HANDLE  SectionHandle;
+    ULONG   CheckSum;
+    ULONG   TimeDateStamp;
+} LDR_DATA_TABLE_ENTRY1, * PLDR_DATA_TABLE_ENTRY1;
+
 inline LPVOID get_module_by_name(WCHAR* module_name)
 {
-    //FIXME
-    //PEB *peb = NtCurrentTeb()->ProcessEnvironmentBlock;
     PEB *peb;
 #if defined(_WIN64)
     peb = (PPEB)__readgsqword(0x60);
@@ -21,18 +37,24 @@ inline LPVOID get_module_by_name(WCHAR* module_name)
 
     LIST_ENTRY *head = &ldr->InMemoryOrderModuleList;
     for(LIST_ENTRY *current = head->Flink; current != head; current = current->Flink){
-        LDR_DATA_TABLE_ENTRY *entry = CONTAINING_RECORD(current, LDR_DATA_TABLE_ENTRY, InMemoryOrderLinks);
+        LDR_DATA_TABLE_ENTRY1* entry = CONTAINING_RECORD(current, LDR_DATA_TABLE_ENTRY1, InMemoryOrderLinks);
+        if (!entry || !entry->DllBase) break;
 
-        UNICODE_STRING *dllName = (&entry->FullDllName) + 1; //hack to access BaseDllName field
-        WCHAR *curr_name = dllName->Buffer;
+        WCHAR* curr_name = entry->BaseDllName.Buffer;
+        if (!curr_name) continue;
 
         size_t i;
-        for (i = 0; module_name[i] != 0 && curr_name[i] != 0; i++) {
+        for (i = 0; i < entry->BaseDllName.Length; i++) {
+            // if any of the strings finished:
+            if (module_name[i] == 0 || curr_name[i] == 0) {
+                break;
+            }
             WCHAR c1, c2;
             TO_LOWERCASE(c1, module_name[i]);
             TO_LOWERCASE(c2, curr_name[i]);
             if (c1 != c2) break;
         }
+        // both of the strings finished, and so far they were identical:
         if (module_name[i] == 0 && curr_name[i] == 0) {
             return entry->DllBase;
         }
