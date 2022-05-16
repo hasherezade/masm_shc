@@ -188,6 +188,9 @@ bool process_file(t_params &params)
             }
             continue;
         }
+        if (tokens[0] == "rex_jmp") {
+            replace_str(line, "rex_jmp", "JMP");
+        }
         std::string curr_const = get_constant(consts_lines, tokens);
         if (params.inlineStrings && curr_const != "") {
             //ofile << ";Token found: " << const_name << "\n";
