@@ -154,7 +154,7 @@ bool process_file(t_params &params)
             if (seg_name == "pdata" || seg_name == "xdata") {
                 in_skipped = true;
             }
-            if (seg_name == "_DATA") {
+            if (seg_name == "CONST" || seg_name == "_DATA") {
                 in_const = true;
             }
             if (tokens[1] == "ENDS" && tokens[0] == seg_name) {
