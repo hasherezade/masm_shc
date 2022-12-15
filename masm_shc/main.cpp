@@ -151,7 +151,7 @@ bool process_file(t_params &params)
                 }
             }
 
-            if (seg_name == "pdata" || seg_name == "xdata") {
+            if (seg_name == "pdata" || seg_name == "xdata" || seg_name == "voltbl") {
                 in_skipped = true;
             }
             if (seg_name == "CONST" || seg_name == "_DATA") {
